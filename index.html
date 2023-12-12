@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed em Tempo Real</title>
+    <style>
+         body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            }
+
+        #relogio {
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #feed {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #feed li {
+            background-color: #fff;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div id="relogio"></div>
+
+<ul id="feed"></ul>
+
+<script>
+// Simula a conexão com o servidor WebSocket (substitua pela sua implementação real)
+const socket = new WebSocket('wss://echo.websocket.org');
+
+// Função para adicionar uma nova mensagem ao feed
+function addToFeed(message) {
+    const feedList = document.getElementById('feed');
+    const listItem = document.createElement('li');
+    listItem.textContent = message;
+    feedList.appendChild(listItem);
+}
+
+// Evento quando a conexão com o servidor WebSocket é estabelecida
+socket.addEventListener('open', (event) => {
+    console.log('Conectado ao servidor WebSocket');
+});
+
+// Evento quando uma mensagem é recebida do servidor WebSocket
+socket.addEventListener('message', (event) => {
+    const message = event.data;
+    console.log(`Mensagem do servidor: ${message}`);
+
+    // Adiciona a mensagem ao feed
+    addToFeed(message);
+});
+
+// Evento quando ocorre um erro na conexão WebSocket
+socket.addEventListener('error', (event) => {
+    console.error('Erro na conexão WebSocket:', event);
+});
+
+// Evento quando a conexão com o servidor WebSocket é fechada
+socket.addEventListener('close', (event) => {
+    console.log('Conexão WebSocket fechada');
+});
+
+// Simula a geração de mensagens no servidor
+setInterval(() => {
+    const randomNumber = Math.floor(Math.random() * 100);
+
+    const dataAtual = new Date();
+
+    // Obtém o minuto e os segundos
+    const minutos = ('0' + dataAtual.getMinutes()).slice(-2);
+    const segundos = ('0' + dataAtual.getSeconds()).slice(-2);
+
+    const message = `Nova mensagem: ${randomNumber} - ${minutos}:${segundos}`;
+    addToFeed(message);
+
+    // Envia a mensagem simulada para o servidor
+    socket.send(message);
+}, 5000); // Gera uma nova mensagem a cada 5 segundos (simulação)
+
+function atualizarRelogio() {
+        const dataAtual = new Date();
+        const minutos = ('0' + dataAtual.getMinutes()).slice(-2);
+        const segundos = ('0' + dataAtual.getSeconds()).slice(-2);
+        const horaFormatada = `${dataAtual.getHours()}:${minutos}:${segundos}`;
+
+        // Atualiza o conteúdo da div com a hora formatada
+        document.getElementById('relogio').innerText = horaFormatada;
+    }
+
+    // Atualiza o relógio a cada segundo
+    setInterval(atualizarRelogio, 1000);
+
+    // Chama a função para exibir a hora atual imediatamente
+    atualizarRelogio();
+</script>
+
+</body>
+</html>
